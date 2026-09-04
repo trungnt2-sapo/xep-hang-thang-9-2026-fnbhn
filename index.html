@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FNB HN — Tháng 9/2026 — Bảng xếp hạng doanh thu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0f1c;
+    --bg-grid: #0d1426;
+    --panel: #121a2e;
+    --panel-2: #17203a;
+    --line: #232d47;
+    --text: #e9edf7;
+    --muted: #8391ae;
+    --gold: #f2b84b;
+    --silver: #b9c2d6;
+    --bronze: #d38a5f;
+    --dtm: #34d9a4;
+    --dtk: #ff8a65;
+    --dtt: #8b93f8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(139,147,248,0.15), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(52,217,164,0.10), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  /* HEADER */
+  header{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    gap:16px;flex-wrap:wrap;margin-bottom:26px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.14em;
+    color:var(--gold);text-transform:uppercase;font-weight:700;margin-bottom:8px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
+  h1{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:clamp(24px,4vw,34px);
+    margin:0 0 6px;letter-spacing:-0.01em;line-height:1.15;
+  }
+  .sub{color:var(--muted);font-size:14px;max-width:520px;}
+
+  .status-box{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:14px 18px;min-width:210px;display:flex;flex-direction:column;gap:8px;
+  }
+  .live-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--dtm);box-shadow:0 0 0 0 rgba(52,217,164,.6);animation:pulse 1.8s infinite;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(52,217,164,.55);}
+    70%{box-shadow:0 0 0 7px rgba(52,217,164,0);}
+    100%{box-shadow:0 0 0 0 rgba(52,217,164,0);}
+  }
+  .updated{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+  .refresh-btn{
+    align-self:flex-start;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:9px;
+    cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s;
+  }
+  .refresh-btn:hover{background:#1c2745;border-color:#39456b;}
+  .refresh-btn svg{width:13px;height:13px;transition:transform .5s;}
+  .refresh-btn.spinning svg{animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* TABS */
+  .tabbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tabbtn{
+    font-family:'Sora',sans-serif;font-weight:700;font-size:13.5px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);padding:10px 16px;border-radius:11px;
+    cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px;
+  }
+  .tabbtn:hover{color:var(--text);border-color:#39456b;}
+  .tabbtn.active{color:#0a0f1c;background:var(--text);border-color:var(--text);}
+
+  .subtabbar{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .subtabbtn{
+    font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;color:var(--muted);
+    background:transparent;border:1px solid var(--line);padding:7px 13px;border-radius:20px;
+    cursor:pointer;transition:.15s;
+  }
+  .subtabbtn[data-metric="dtm"].active{background:rgba(52,217,164,.15);color:var(--dtm);border-color:var(--dtm);}
+  .subtabbtn[data-metric="dtk"].active{background:rgba(255,138,101,.15);color:var(--dtk);border-color:var(--dtk);}
+  .subtabbtn[data-metric="dtt"].active{background:rgba(139,147,248,.15);color:var(--dtt);border-color:var(--dtt);}
+  .subtabbtn:hover{color:var(--text);}
+
+  /* PANEL */
+  .panel{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-radius:18px;padding:22px 20px 12px;
+    position:relative;overflow:hidden;
+  }
+  .panel::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  }
+  .panel-title{
+    font-family:'Sora',sans-serif;font-weight:700;font-size:15px;margin:0 0 2px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .panel-title .metric-pill{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;padding:2px 8px;
+    border-radius:6px;letter-spacing:.05em;
+  }
+  .panel-sub{color:var(--muted);font-size:12.5px;margin-bottom:16px;}
+
+  .list{max-height:560px;overflow-y:auto;padding-right:4px;}
+  .list::-webkit-scrollbar{width:6px;}
+  .list::-webkit-scrollbar-thumb{background:#2a3556;border-radius:6px;}
+  .list::-webkit-scrollbar-track{background:transparent;}
+
+  .row{
+    display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;
+    padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.045);
+  }
+  .row:last-child{border-bottom:none;}
+  .rank{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--muted);
+    text-align:center;
+  }
+  .rank.r1{color:var(--gold);font-size:16px;}
+  .rank.r2{color:var(--silver);}
+  .rank.r3{color:var(--bronze);}
+
+  .namecol{min-width:0;}
+  .name-line{display:flex;align-items:baseline;gap:7px;margin-bottom:5px;flex-wrap:wrap;}
+  .name{font-weight:600;font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .team-tag{
+    font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
+    background:rgba(255,255,255,.05);padding:1px 6px;border-radius:5px;white-space:nowrap;
+  }
+  .bar-track{height:8px;background:rgba(255,255,255,.055);border-radius:6px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:6px;position:relative;min-width:2%;transition:width .6s cubic-bezier(.4,0,.2,1);}
+  .bar-fill.dtm{background:linear-gradient(90deg,#1fa87a,var(--dtm));}
+  .bar-fill.dtk{background:linear-gradient(90deg,#d9633a,var(--dtk));}
+  .bar-fill.dtt{background:linear-gradient(90deg,#5d63e0,var(--dtt));}
+  .bar-fill.r1::after{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.22) 0 2px,transparent 2px 7px);
+  }
+  .value{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--text);
+    text-align:right;white-space:nowrap;min-width:64px;
+  }
+  .value small{color:var(--muted);font-weight:500;font-size:10px;}
+
+  .empty,.error{padding:34px 10px;text-align:center;color:var(--muted);font-size:13.5px;}
+  .error{color:#ff9d8a;}
+  .error .retry{
+    margin-top:12px;display:inline-block;background:var(--panel-2);border:1px solid var(--line);
+    color:var(--text);padding:7px 14px;border-radius:9px;font-size:12.5px;cursor:pointer;font-weight:600;
+  }
+  .skeleton .row{opacity:.5;}
+  .skel-bar{height:8px;border-radius:6px;background:linear-gradient(90deg,#1a2340,#232d4d,#1a2340);
+    background-size:200% 100%;animation:shimmer 1.3s infinite;}
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+  footer{margin-top:22px;text-align:center;color:var(--muted);font-size:11.5px;font-family:'JetBrains Mono',monospace;}
+  footer a{color:var(--muted);}
+
+  @media (max-width:560px){
+    .status-box{width:100%;}
+    .row{grid-template-columns:26px 1fr auto;gap:8px;}
+    .value{min-width:52px;font-size:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow"><span class="dot"></span>SAPO · TRUNG TÂM FNB HÀ NỘI · THÁNG 9/2026</div>
+      <h1>Bảng xếp hạng doanh thu</h1>
+      <div class="sub">Dữ liệu đồng bộ trực tiếp từ Google Sheet — tự động làm mới mỗi 30 giây.</div>
+    </div>
+    <div class="status-box">
+      <div class="live-row"><span class="live-dot"></span> ĐANG TRỰC TIẾP</div>
+      <div class="updated" id="updatedAt">Đang tải dữ liệu…</div>
+      <button class="refresh-btn" id="refreshBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg>
+        Làm mới ngay
+      </button>
+    </div>
+  </header>
+
+  <div class="tabbar">
+    <button class="tabbtn active" data-view="team">🏢&nbsp; Xếp hạng Team</button>
+    <button class="tabbtn" data-view="individual">👤&nbsp; Xếp hạng Cá nhân</button>
+  </div>
+
+  <div class="subtabbar">
+    <button class="subtabbtn active" data-metric="dtm">Doanh thu mềm (DTM)</button>
+    <button class="subtabbtn" data-metric="dtk">Doanh thu khác (DTK)</button>
+    <button class="subtabbtn" data-metric="dtt">Doanh thu tổng (DTT)</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title" id="panelTitle">Xếp hạng Team — Doanh thu mềm <span class="metric-pill" id="metricPill" style="background:rgba(52,217,164,.15);color:#34d9a4;">DTM</span></div>
+    <div class="panel-sub" id="panelSub">6 team · sắp xếp theo kết quả giảm dần</div>
+    <div class="list" id="listEl">
+      <div class="empty">Đang tải dữ liệu từ Google Sheet…</div>
+    </div>
+  </div>
+
+  <footer>
+    Nguồn dữ liệu: Google Sheet "TRUNG TÂM FNB HN 2026 - THÁNG 9 2026" · Cột E = DTM, Cột F = DTK, DTT = E + F
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+const SHEET_ID = "1PSL8qFDXv5-IN-r_Me0t7ADdWikINxHnB8RR8kfj-q4";
+const GID = "128464397";
+// Paste your deployed Apps Script Web App URL here (see AppsScript_Code.gs).
+// Leave empty ("") to fall back to CSV + public CORS proxies (less reliable).
+const APPS_SCRIPT_URL = "";
+const CSV_URL = () => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&_ts=${Date.now()}`;
+const REFRESH_MS = 30000;
+
+let state = { view: "team", metric: "dtm", teams: [], members: [], loaded: false };
+
+function parseNum(v){
+  if (v === undefined || v === null) return 0;
+  let s = String(v).trim();
+  if (s === "" || s === "-" || s === "—") return 0;
+  s = s.replace(/,/g, "");
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function normalize(s){ return (s || "").toString().trim(); }
+
+function isTotalRow(name){
+  const n = normalize(name).toUpperCase();
+  return n.startsWith("TỔNG") || n.startsWith("TONG");
+}
+function isVacantSeat(name){
+  const n = normalize(name).toUpperCase();
+  return n.startsWith("NS ") || n === "NS" || n.startsWith("NS MỚI") || n.startsWith("NS MOI");
+}
+
+function parseSheet(rows){
+  // ---- Team block: find row where col[1] === 'FNB HN' ----
+  let teamHeaderIdx = -1;
+  for (let i = 0; i < rows.length; i++){
+    if (normalize(rows[i][1]) === "FNB HN"){ teamHeaderIdx = i; break; }
+  }
+  const teams = [];
+  if (teamHeaderIdx !== -1){
+    for (let i = teamHeaderIdx + 1; i < rows.length; i++){
+      const row = rows[i];
+      const name = normalize(row[1]);
+      if (!name) break;
+      if (isTotalRow(name)) break;
+      const dtm = parseNum(row[4]);
+      const dtk = parseNum(row[5]);
+      teams.push({ name, dtm, dtk, dtt: dtm + dtk });
+    }
+  }
+
+  // ---- Individual blocks: find every row where col[0] === 'IPPhone' ----
+  const members = [];
+  for (let i = 0; i < rows.length; i++){
+    if (normalize(rows[i][0]) !== "IPPhone") continue;
+    const teamName = normalize(rows[i][1]);
+    // rows[i+1] is the sub-header (DTM/DTK labels) — skip it
+    for (let j = i + 2; j < rows.length; j++){
+      const row = rows[j];
+      const name = normalize(row[1]);
+      if (!name) break;
+      if (isTotalRow(name)) break;
+      if (!isVacantSeat(name)){
+        const dtm = parseNum(row[4]);
+        const dtk = parseNum(row[5]);
+        members.push({ name, team: teamName, dtm, dtk, dtt: dtm + dtk });
+      }
+    }
+  }
+
+  return { teams, members };
+}
+
+async function fetchViaCSV(){
+  const rawUrl = CSV_URL();
+  const attempts = [
+    rawUrl,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`,
+    `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(rawUrl)}`
+  ];
+  let lastErr = null;
+  for (const url of attempts){
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP_" + res.status);
+      const text = await res.text();
+      if (!text || text.trim().length < 10) throw new Error("EMPTY_RESPONSE");
+      const parsed = Papa.parse(text, { skipEmptyLines: false });
+      if (!parsed.data || parsed.data.length < 5) throw new Error("BAD_CSV");
+      return parsed.data;
+    } catch (err){
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error("ALL_CSV_ATTEMPTS_FAILED");
+}
+
+async function fetchViaAppsScript(){
+  const res = await fetch(APPS_SCRIPT_URL + (APPS_SCRIPT_URL.includes("?") ? "&" : "?") + "_ts=" + Date.now(), { cache: "no-store" });
+  if (!res.ok) throw new Error("HTTP_" + res.status);
+  const json = await res.json();
+  if (!json || (!json.teams && !json.members)) throw new Error("BAD_JSON");
+  return { teams: json.teams || [], members: json.members || [] };
+}
+
+async function fetchData(isManual){
+  const btn = document.getElementById("refreshBtn");
+  if (isManual) btn.classList.add("spinning");
+  let result = null;
+  let lastErr = null;
+
+  try {
+    if (APPS_SCRIPT_URL) {
+      result = await fetchViaAppsScript();
+    } else {
+      const rows = await fetchViaCSV();
+      result = parseSheet(rows);
+    }
+    if (result.teams.length === 0 && result.members.length === 0) throw new Error("EMPTY_PARSE");
+  } catch (err) {
+    lastErr = err;
+  }
+
+  if (result) {
+    state.teams = result.teams;
+    state.members = result.members;
+    state.loaded = true;
+    document.getElementById("updatedAt").innerHTML =
+      "Cập nhật lúc " + new Date().toLocaleTimeString("vi-VN", { hour12: false });
+    render();
+  } else if (!state.loaded) {
+    // Never successfully loaded yet -> show full error state.
+    document.getElementById("listEl").innerHTML = `
+      <div class="error">
+        Không tải được dữ liệu từ Google Sheet.<br>
+        <span style="font-size:11.5px;opacity:.75;">Lỗi: ${(lastErr && lastErr.message) || "unknown"}</span><br><br>
+        1. Kiểm tra sheet đã chia sẻ ở chế độ <b>"Anyone with the link – Viewer"</b> chưa.<br>
+        2. Để ổn định tuyệt đối, dùng Apps Script bridge (xem hướng dẫn) thay vì proxy bên thứ 3.
+        <div class="retry" onclick="fetchData(true)">Thử lại</div>
+      </div>`;
+    document.getElementById("updatedAt").textContent = "Lỗi tải dữ liệu";
+  } else {
+    // Already have good data on screen -> don't wipe it, just flag it quietly.
+    document.getElementById("updatedAt").innerHTML =
+      `<span style="color:#ff9d8a;">Làm mới thất bại — đang hiện dữ liệu cũ</span>`;
+  }
+
+  if (isManual) setTimeout(() => btn.classList.remove("spinning"), 500);
+}
+
+const METRIC_LABEL = { dtm: "Doanh thu mềm", dtk: "Doanh thu khác", dtt: "Doanh thu tổng" };
+const METRIC_COLOR = { dtm: "#34d9a4", dtk: "#ff8a65", dtt: "#8b93f8" };
+const METRIC_BG    = { dtm: "rgba(52,217,164,.15)", dtk: "rgba(255,138,101,.15)", dtt: "rgba(139,147,248,.15)" };
+
+function fmt(n){
+  return n.toLocaleString("vi-VN", { minimumFractionDigits: n % 1 === 0 ? 0 : 1, maximumFractionDigits: 3 });
+}
+
+function render(){
+  const { view, metric } = state;
+  const isTeam = view === "team";
+  const dataset = isTeam ? state.teams : state.members;
+  const sorted = [...dataset].sort((a, b) => b[metric] - a[metric]);
+  const max = sorted.length ? sorted[0][metric] : 1;
+
+  document.getElementById("panelTitle").innerHTML =
+    (isTeam ? "Xếp hạng Team" : "Xếp hạng Cá nhân (toàn trung tâm)") + " — " + METRIC_LABEL[metric] +
+    ` <span class="metric-pill" style="background:${METRIC_BG[metric]};color:${METRIC_COLOR[metric]};">${metric.toUpperCase()}</span>`;
+  document.getElementById("panelSub").textContent =
+    (isTeam ? `${sorted.length} team` : `${sorted.length} thành viên · tất cả các team`) + " · sắp xếp theo kết quả giảm dần";
+
+  if (sorted.length === 0){
+    document.getElementById("listEl").innerHTML = `<div class="empty">Không có dữ liệu.</div>`;
+    return;
+  }
+
+  const html = sorted.map((item, idx) => {
+    const rank = idx + 1;
+    const rankClass = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
+    const rankLabel = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : String(rank).padStart(2, "0");
+    const pct = Math.max((item[metric] / max) * 100, item[metric] > 0 ? 2 : 0);
+    const teamTag = isTeam ? "" : `<span class="team-tag">${item.team}</span>`;
+    return `
+      <div class="row">
+        <div class="rank ${rankClass}">${rankLabel}</div>
+        <div class="namecol">
+          <div class="name-line"><span class="name">${item.name}</span>${teamTag}</div>
+          <div class="bar-track"><div class="bar-fill ${metric} ${rank === 1 ? "r1" : ""}" style="width:${pct}%"></div></div>
+        </div>
+        <div class="value">${fmt(item[metric])}</div>
+      </div>`;
+  }).join("");
+
+  document.getElementById("listEl").innerHTML = html;
+}
+
+document.querySelectorAll(".tabbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabbtn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    state.view = btn.dataset.view;
+    if (state.loaded) render();
+  });
+});
+
+document.querySelectorAll(".subtabbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".subtabbtn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    state.metric = btn.dataset.metric;
+    if (state.loaded) render();
+  });
+});
+
+document.getElementById("refreshBtn").addEventListener("click", () => fetchData(true));
+
+fetchData(false);
+setInterval(() => fetchData(false), REFRESH_MS);
+</script>
+</body>
+</html>
